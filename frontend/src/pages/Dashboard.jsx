@@ -17,6 +17,7 @@ import {
   ChevronLeft, 
   ChevronRight,
   Printer,
+  Sunrise,
   Sun,
   Sunset,
   Moon,
@@ -28,15 +29,17 @@ const API = `${BACKEND_URL}/api`;
 
 const getTimeBadgeClass = (time) => {
   const hour = parseInt(time.split(":")[0]);
+  if (hour < 8) return "time-badge time-badge-early";
   if (hour < 12) return "time-badge time-badge-morning";
-  if (hour < 17) return "time-badge time-badge-afternoon";
+  if (hour < 18) return "time-badge time-badge-afternoon";
   return "time-badge time-badge-evening";
 };
 
 const getTimeIcon = (time) => {
   const hour = parseInt(time.split(":")[0]);
+  if (hour < 8) return <Sunrise className="w-3.5 h-3.5" />;
   if (hour < 12) return <Sun className="w-3.5 h-3.5" />;
-  if (hour < 17) return <Sunset className="w-3.5 h-3.5" />;
+  if (hour < 18) return <Sunset className="w-3.5 h-3.5" />;
   return <Moon className="w-3.5 h-3.5" />;
 };
 
@@ -180,14 +183,17 @@ export default function Dashboard() {
   const groupedMedicines = medicines.reduce((acc, med) => {
     const hour = parseInt(med.time.split(":")[0]);
     let period;
-    if (hour < 12) period = "Morning";
-    else if (hour < 17) period = "Afternoon";
+    if (hour < 8) period = "Early Morning";
+    else if (hour < 12) period = "Morning";
+    else if (hour < 18) period = "Afternoon";
     else period = "Evening";
     
     if (!acc[period]) acc[period] = [];
     acc[period].push(med);
     return acc;
   }, {});
+  
+  const periodOrder = ["Early Morning", "Morning", "Afternoon", "Evening"];
 
   const navigateDate = (direction) => {
     setSelectedDate(prev => direction === 'next' ? addDays(prev, 1) : subDays(prev, 1));
@@ -359,19 +365,20 @@ export default function Dashboard() {
               </Card>
             ) : (
               <div className="space-y-8">
-                {Object.entries(groupedMedicines).map(([period, meds]) => (
+                {periodOrder.filter(period => groupedMedicines[period]).map((period) => (
                   <div key={period}>
                     <div className="flex items-center gap-2 mb-4">
+                      {period === "Early Morning" && <Sunrise className="w-5 h-5 text-orange-400" />}
                       {period === "Morning" && <Sun className="w-5 h-5 text-amber-500" />}
                       {period === "Afternoon" && <Sunset className="w-5 h-5 text-sky-500" />}
                       {period === "Evening" && <Moon className="w-5 h-5 text-indigo-500" />}
                       <h3 className="text-lg font-semibold text-slate-800">{period}</h3>
                       <Badge variant="secondary" className="ml-auto">
-                        {meds.filter(m => intakeRecords[`${m.medicine_id}-${m.time}`]).length}/{meds.length}
+                        {groupedMedicines[period].filter(m => intakeRecords[`${m.medicine_id}-${m.time}`]).length}/{groupedMedicines[period].length}
                       </Badge>
                     </div>
                     <div className="space-y-3">
-                      {meds.map((medicine, idx) => (
+                      {groupedMedicines[period].map((medicine, idx) => (
                         <MedicineCard
                           key={`${medicine.medicine_id}-${medicine.time}`}
                           medicine={medicine}
