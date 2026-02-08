@@ -1,34 +1,107 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
-}
-
-.App-header {
-    background-color: #0f0f10;
+/* App-specific styles */
+.app-container {
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
 }
 
-.App-link {
-    color: #61dafb;
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
+@media (min-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 350px 1fr;
     }
-    to {
-        transform: rotate(360deg);
+}
+
+.schedule-timeline {
+    position: relative;
+}
+
+.schedule-timeline::before {
+    content: '';
+    position: absolute;
+    left: 24px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, hsl(160 84% 39% / 0.3) 0%, hsl(160 84% 39% / 0.1) 100%);
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 60px;
+    margin-bottom: 1rem;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 3px solid hsl(160 84% 39%);
+    background: white;
+    z-index: 1;
+}
+
+.timeline-dot.taken {
+    background: hsl(160 84% 39%);
+}
+
+.progress-ring {
+    transform: rotate(-90deg);
+}
+
+.progress-ring-circle {
+    transition: stroke-dashoffset 0.5s ease;
+}
+
+/* Custom checkbox styling */
+.medicine-checkbox {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+}
+
+.medicine-checkbox[data-state="checked"] {
+    background-color: hsl(160 84% 39%);
+    border-color: hsl(160 84% 39%);
+}
+
+/* Print styles */
+@media print {
+    .app-container {
+        padding: 0;
+    }
+    
+    .glass-header {
+        position: relative;
+        background: white;
+        backdrop-filter: none;
+    }
+    
+    .dashboard-grid {
+        display: block;
+    }
+    
+    .print-schedule-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .print-schedule-table th,
+    .print-schedule-table td {
+        border: 1px solid #e2e8f0;
+        padding: 8px 12px;
+        text-align: left;
+    }
+    
+    .print-schedule-table th {
+        background: #f8faf9;
+        font-weight: 600;
     }
 }
