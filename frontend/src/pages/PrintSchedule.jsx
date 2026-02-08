@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
-import { format, parseISO, addDays } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { Button } from "../components/ui/button";
 import { Calendar } from "../components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
@@ -12,9 +11,7 @@ import {
   ArrowLeft,
   Pill
 } from "lucide-react";
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+import { MEDICINES, getFullSchedule } from "../data/medicines";
 
 const formatTime = (time) => {
   const [hours, minutes] = time.split(":");
@@ -25,7 +22,6 @@ const formatTime = (time) => {
 };
 
 export default function PrintSchedule() {
-  const [medicines, setMedicines] = useState([]);
   const [schedule, setSchedule] = useState([]);
   const [loading, setLoading] = useState(true);
   const [startDate, setStartDate] = useState(new Date(2026, 1, 7));
@@ -35,31 +31,14 @@ export default function PrintSchedule() {
   const [endCalendarOpen, setEndCalendarOpen] = useState(false);
 
   useEffect(() => {
-    const fetchMedicines = async () => {
-      try {
-        const res = await axios.get(`${API}/medicines`);
-        setMedicines(res.data);
-        setSelectedMedicines(res.data.map(m => m.id));
-      } catch (error) {
-        console.error("Error fetching medicines:", error);
-      }
-    };
-    fetchMedicines();
+    setSelectedMedicines(MEDICINES.map(m => m.id));
   }, []);
 
   useEffect(() => {
-    const fetchSchedule = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.get(`${API}/schedule/full`);
-        setSchedule(res.data);
-      } catch (error) {
-        console.error("Error fetching schedule:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchSchedule();
+    setLoading(true);
+    const fullSchedule = getFullSchedule();
+    setSchedule(fullSchedule);
+    setLoading(false);
   }, []);
 
   const filteredSchedule = schedule.filter(item => {
@@ -112,6 +91,12 @@ export default function PrintSchedule() {
     URL.revokeObjectURL(url);
   };
 
+  const goBack = () => {
+    // Handle both development and GitHub Pages routing
+    const basePath = window.location.pathname.replace(/\/print\/?$/, '');
+    window.location.href = basePath || '/';
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="glass-header no-print">
@@ -121,7 +106,7 @@ export default function PrintSchedule() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => window.location.href = '/'}
+                onClick={goBack}
                 data-testid="back-btn"
               >
                 <ArrowLeft className="w-5 h-5" />
@@ -223,10 +208,10 @@ export default function PrintSchedule() {
             <div className="bg-card rounded-xl border border-border p-5">
               <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
                 <Pill className="w-4 h-4 text-primary" />
-                Medicines ({selectedMedicines.length}/{medicines.length})
+                Medicines ({selectedMedicines.length}/{MEDICINES.length})
               </h3>
               <div className="space-y-3 max-h-96 overflow-y-auto">
-                {medicines.map(med => (
+                {MEDICINES.map(med => (
                   <label 
                     key={med.id} 
                     className="flex items-center gap-3 cursor-pointer group"

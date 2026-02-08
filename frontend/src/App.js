@@ -1,5 +1,5 @@
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import PrintSchedule from "./pages/PrintSchedule";
 import { Toaster } from "./components/ui/sonner";
@@ -7,12 +7,12 @@ import { Toaster } from "./components/ui/sonner";
 function App() {
   return (
     <div className="app-container">
-      <BrowserRouter>
+      <HashRouter>
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/print" element={<PrintSchedule />} />
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
       <Toaster position="bottom-right" />
     </div>
   );

@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import axios from "axios";
-import { format, addDays, subDays, parseISO } from "date-fns";
+import { format, addDays, subDays } from "date-fns";
 import { Calendar } from "../components/ui/calendar";
 import { Checkbox } from "../components/ui/checkbox";
 import { Button } from "../components/ui/button";
@@ -12,7 +11,6 @@ import { toast } from "sonner";
 import { 
   Pill, 
   Calendar as CalendarIcon, 
-  Clock, 
   CheckCircle2, 
   ChevronLeft, 
   ChevronRight,
@@ -23,9 +21,12 @@ import {
   Moon,
   Activity
 } from "lucide-react";
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+import {
+  getMedicinesForDate,
+  getIntakeRecordsForDate,
+  saveIntakeRecord,
+  getStatsForDate
+} from "../data/medicines";
 
 const getTimeBadgeClass = (time) => {
   const hour = parseInt(time.split(":")[0]);
@@ -94,16 +95,6 @@ const MedicineCard = ({ medicine, taken, onToggle, index }) => {
   );
 };
 
-const StatCard = ({ icon: Icon, label, value, color }) => (
-  <div className="stat-card">
-    <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 ${color}`}>
-      <Icon className="w-5 h-5" />
-    </div>
-    <span className="text-2xl font-bold text-slate-900">{value}</span>
-    <span className="text-sm text-muted-foreground">{label}</span>
-  </div>
-);
-
 export default function Dashboard() {
   const [selectedDate, setSelectedDate] = useState(new Date(2026, 1, 7));
   const [medicines, setMedicines] = useState([]);
@@ -111,42 +102,41 @@ export default function Dashboard() {
   const [stats, setStats] = useState({ total: 0, taken: 0, pending: 0, percentage: 0 });
   const [loading, setLoading] = useState(true);
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("all");
 
   const dateStr = format(selectedDate, "yyyy-MM-dd");
 
-  const fetchData = useCallback(async () => {
+  const loadData = useCallback(() => {
     setLoading(true);
-    try {
-      const [scheduleRes, intakeRes, statsRes] = await Promise.all([
-        axios.get(`${API}/medicines/schedule/${dateStr}`),
-        axios.get(`${API}/intake/${dateStr}`),
-        axios.get(`${API}/stats/${dateStr}`)
-      ]);
-
-      setMedicines(scheduleRes.data);
-      
-      const intakeMap = {};
-      intakeRes.data.forEach(record => {
-        intakeMap[`${record.medicine_id}-${record.time}`] = record.taken;
-      });
-      setIntakeRecords(intakeMap);
-      setStats(statsRes.data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      toast.error("Failed to load medicines");
-    } finally {
-      setLoading(false);
-    }
+    
+    // Get medicines for selected date
+    const scheduledMedicines = getMedicinesForDate(dateStr);
+    setMedicines(scheduledMedicines);
+    
+    // Get intake records from localStorage
+    const records = getIntakeRecordsForDate(dateStr);
+    const intakeMap = {};
+    Object.keys(records).forEach(key => {
+      intakeMap[key] = records[key].taken;
+    });
+    setIntakeRecords(intakeMap);
+    
+    // Get stats
+    const dateStats = getStatsForDate(dateStr);
+    setStats(dateStats);
+    
+    setLoading(false);
   }, [dateStr]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    loadData();
+  }, [loadData]);
 
-  const handleToggle = async (medicine, currentTaken) => {
+  const handleToggle = (medicine, currentTaken) => {
     const key = `${medicine.medicine_id}-${medicine.time}`;
     const newTaken = !currentTaken;
     
+    // Optimistic update
     setIntakeRecords(prev => ({ ...prev, [key]: newTaken }));
     setStats(prev => ({
       ...prev,
@@ -155,20 +145,15 @@ export default function Dashboard() {
       percentage: Math.round(((newTaken ? prev.taken + 1 : prev.taken - 1) / prev.total) * 100)
     }));
 
-    try {
-      await axios.post(`${API}/intake`, {
-        medicine_id: medicine.medicine_id,
-        date: dateStr,
-        time: medicine.time,
-        taken: newTaken
+    // Save to localStorage
+    const success = saveIntakeRecord(dateStr, medicine.medicine_id, medicine.time, newTaken);
+    
+    if (success && newTaken) {
+      toast.success(`${medicine.name} marked as taken`, {
+        icon: <CheckCircle2 className="w-4 h-4 text-emerald-600" />
       });
-      
-      if (newTaken) {
-        toast.success(`${medicine.name} marked as taken`, {
-          icon: <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-        });
-      }
-    } catch (error) {
+    } else if (!success) {
+      // Revert on failure
       setIntakeRecords(prev => ({ ...prev, [key]: currentTaken }));
       setStats(prev => ({
         ...prev,
@@ -176,12 +161,11 @@ export default function Dashboard() {
         pending: currentTaken ? prev.pending : prev.pending + 1,
         percentage: Math.round((currentTaken ? prev.taken : prev.taken - 1) / prev.total * 100)
       }));
-      toast.error("Failed to update. Please try again.");
+      toast.error("Failed to save. Please try again.");
     }
   };
 
   const periodOrder = ["Early Morning", "Morning", "Afternoon", "Evening"];
-  const [activeTab, setActiveTab] = useState("all");
 
   const groupedMedicines = medicines.reduce((acc, med) => {
     const hour = parseInt(med.time.split(":")[0]);
@@ -232,7 +216,7 @@ export default function Dashboard() {
             <Button 
               variant="outline" 
               className="gap-2 rounded-full"
-              onClick={() => window.open('/print', '_blank')}
+              onClick={() => window.location.href = window.location.pathname.replace(/\/$/, '') + '/print'}
               data-testid="print-schedule-btn"
             >
               <Printer className="w-4 h-4" />
