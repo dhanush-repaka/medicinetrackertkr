@@ -7,7 +7,7 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
 import { Badge } from "../components/ui/badge";
-import { Progress } from "../components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { toast } from "sonner";
 import { 
   Pill, 
@@ -180,6 +180,9 @@ export default function Dashboard() {
     }
   };
 
+  const periodOrder = ["Early Morning", "Morning", "Afternoon", "Evening"];
+  const [activeTab, setActiveTab] = useState("all");
+
   const groupedMedicines = medicines.reduce((acc, med) => {
     const hour = parseInt(med.time.split(":")[0]);
     let period;
@@ -192,8 +195,21 @@ export default function Dashboard() {
     acc[period].push(med);
     return acc;
   }, {});
-  
-  const periodOrder = ["Early Morning", "Morning", "Afternoon", "Evening"];
+
+  const getFilteredMedicines = () => {
+    if (activeTab === "all") return groupedMedicines;
+    if (groupedMedicines[activeTab]) {
+      return { [activeTab]: groupedMedicines[activeTab] };
+    }
+    return {};
+  };
+
+  const getPeriodCount = (period) => {
+    if (!groupedMedicines[period]) return { taken: 0, total: 0 };
+    const meds = groupedMedicines[period];
+    const taken = meds.filter(m => intakeRecords[`${m.medicine_id}-${m.time}`]).length;
+    return { taken, total: meds.length };
+  };
 
   const navigateDate = (direction) => {
     setSelectedDate(prev => direction === 'next' ? addDays(prev, 1) : subDays(prev, 1));
@@ -364,36 +380,72 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-8">
-                {periodOrder.filter(period => groupedMedicines[period]).map((period) => (
-                  <div key={period}>
-                    <div className="flex items-center gap-2 mb-4">
-                      {period === "Early Morning" && <Sunrise className="w-5 h-5 text-orange-400" />}
-                      {period === "Morning" && <Sun className="w-5 h-5 text-amber-500" />}
-                      {period === "Afternoon" && <Sunset className="w-5 h-5 text-sky-500" />}
-                      {period === "Evening" && <Moon className="w-5 h-5 text-indigo-500" />}
-                      <h3 className="text-lg font-semibold text-slate-800">{period}</h3>
-                      <Badge variant="secondary" className="ml-auto">
-                        {groupedMedicines[period].filter(m => intakeRecords[`${m.medicine_id}-${m.time}`]).length}/{groupedMedicines[period].length}
-                      </Badge>
-                    </div>
-                    <div className="space-y-3">
-                      {groupedMedicines[period].map((medicine, idx) => (
-                        <MedicineCard
-                          key={`${medicine.medicine_id}-${medicine.time}`}
-                          medicine={medicine}
-                          taken={intakeRecords[`${medicine.medicine_id}-${medicine.time}`] || false}
-                          onToggle={() => handleToggle(
-                            medicine, 
-                            intakeRecords[`${medicine.medicine_id}-${medicine.time}`] || false
-                          )}
-                          index={idx}
-                        />
-                      ))}
-                    </div>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="w-full flex mb-6 bg-slate-100 p-1 rounded-xl h-auto flex-wrap gap-1" data-testid="time-tabs">
+                  <TabsTrigger 
+                    value="all" 
+                    className="flex-1 min-w-[80px] rounded-lg py-2.5 px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                    data-testid="tab-all"
+                  >
+                    <span className="font-medium">All</span>
+                    <Badge variant="secondary" className="ml-2 text-xs">{stats.taken}/{stats.total}</Badge>
+                  </TabsTrigger>
+                  {periodOrder.map(period => {
+                    const count = getPeriodCount(period);
+                    if (count.total === 0) return null;
+                    return (
+                      <TabsTrigger 
+                        key={period} 
+                        value={period}
+                        className="flex-1 min-w-[100px] rounded-lg py-2.5 px-3 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                        data-testid={`tab-${period.toLowerCase().replace(' ', '-')}`}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          {period === "Early Morning" && <Sunrise className="w-4 h-4 text-orange-500" />}
+                          {period === "Morning" && <Sun className="w-4 h-4 text-amber-500" />}
+                          {period === "Afternoon" && <Sunset className="w-4 h-4 text-sky-500" />}
+                          {period === "Evening" && <Moon className="w-4 h-4 text-indigo-500" />}
+                          <span className="font-medium hidden sm:inline">{period}</span>
+                          <Badge variant="secondary" className="ml-1 text-xs">{count.taken}/{count.total}</Badge>
+                        </div>
+                      </TabsTrigger>
+                    );
+                  })}
+                </TabsList>
+
+                <TabsContent value={activeTab} className="mt-0">
+                  <div className="space-y-8">
+                    {periodOrder.filter(period => getFilteredMedicines()[period]).map((period) => (
+                      <div key={period}>
+                        <div className="flex items-center gap-2 mb-4">
+                          {period === "Early Morning" && <Sunrise className="w-5 h-5 text-orange-400" />}
+                          {period === "Morning" && <Sun className="w-5 h-5 text-amber-500" />}
+                          {period === "Afternoon" && <Sunset className="w-5 h-5 text-sky-500" />}
+                          {period === "Evening" && <Moon className="w-5 h-5 text-indigo-500" />}
+                          <h3 className="text-lg font-semibold text-slate-800">{period}</h3>
+                          <Badge variant="secondary" className="ml-auto">
+                            {getFilteredMedicines()[period].filter(m => intakeRecords[`${m.medicine_id}-${m.time}`]).length}/{getFilteredMedicines()[period].length}
+                          </Badge>
+                        </div>
+                        <div className="space-y-3">
+                          {getFilteredMedicines()[period].map((medicine, idx) => (
+                            <MedicineCard
+                              key={`${medicine.medicine_id}-${medicine.time}`}
+                              medicine={medicine}
+                              taken={intakeRecords[`${medicine.medicine_id}-${medicine.time}`] || false}
+                              onToggle={() => handleToggle(
+                                medicine, 
+                                intakeRecords[`${medicine.medicine_id}-${medicine.time}`] || false
+                              )}
+                              index={idx}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </TabsContent>
+              </Tabs>
             )}
           </section>
         </div>
