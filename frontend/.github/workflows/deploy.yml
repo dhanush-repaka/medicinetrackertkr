@@ -17,6 +17,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,9 +29,10 @@ jobs:
         with:
           node-version: '20'
           cache: 'yarn'
+          cache-dependency-path: './frontend/yarn.lock'
       
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
       
       - name: Build
         run: yarn build
@@ -39,7 +43,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './build'
+          path: './frontend/build'
 
   deploy:
     environment:
