@@ -122,9 +122,6 @@ export const MEDICINES = [
   }
 ];
 
-// Storage keys
-const INTAKE_STORAGE_KEY = "medicine_intake_records";
-
 // Get medicines scheduled for a specific date
 export const getMedicinesForDate = (dateStr) => {
   const targetDate = new Date(dateStr);
@@ -152,71 +149,6 @@ export const getMedicinesForDate = (dateStr) => {
   // Sort by time
   scheduled.sort((a, b) => a.time.localeCompare(b.time));
   return scheduled;
-};
-
-// Get all intake records from localStorage
-export const getAllIntakeRecords = () => {
-  try {
-    const stored = localStorage.getItem(INTAKE_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : {};
-  } catch (e) {
-    console.error("Error reading intake records:", e);
-    return {};
-  }
-};
-
-// Get intake records for a specific date
-export const getIntakeRecordsForDate = (dateStr) => {
-  const allRecords = getAllIntakeRecords();
-  return allRecords[dateStr] || {};
-};
-
-// Save intake record
-export const saveIntakeRecord = (dateStr, medicineId, time, taken) => {
-  try {
-    const allRecords = getAllIntakeRecords();
-    
-    if (!allRecords[dateStr]) {
-      allRecords[dateStr] = {};
-    }
-    
-    const key = `${medicineId}-${time}`;
-    allRecords[dateStr][key] = {
-      medicine_id: medicineId,
-      time: time,
-      taken: taken,
-      taken_at: taken ? new Date().toISOString() : null
-    };
-    
-    localStorage.setItem(INTAKE_STORAGE_KEY, JSON.stringify(allRecords));
-    return true;
-  } catch (e) {
-    console.error("Error saving intake record:", e);
-    return false;
-  }
-};
-
-// Get stats for a specific date
-export const getStatsForDate = (dateStr) => {
-  const scheduled = getMedicinesForDate(dateStr);
-  const intakeRecords = getIntakeRecordsForDate(dateStr);
-  
-  const total = scheduled.length;
-  let taken = 0;
-  
-  scheduled.forEach(med => {
-    const key = `${med.medicine_id}-${med.time}`;
-    if (intakeRecords[key]?.taken) {
-      taken++;
-    }
-  });
-  
-  return {
-    total,
-    taken,
-    pending: total - taken,
-    percentage: total > 0 ? Math.round((taken / total) * 100) : 0
-  };
 };
 
 // Get full schedule for export
