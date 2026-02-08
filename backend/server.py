@@ -25,6 +25,7 @@ app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
 # Medicine data based on prescription - Start Date: Feb 7, 2026
+# Prescription dated 04-FEB-2026, Surgery on 03.02.2026
 MEDICINES = [
     {
         "id": "1",
@@ -33,7 +34,7 @@ MEDICINES = [
         "frequency": "twice",
         "times": ["08:00", "20:00"],
         "duration_days": 7,
-        "instruction": "PER ORAL",
+        "instruction": "PER ORAL TWICE DAILY AT 8AM AND 8PM X 1 WEEK",
         "start_date": "2026-02-07"
     },
     {
@@ -43,7 +44,7 @@ MEDICINES = [
         "frequency": "twice",
         "times": ["08:00", "20:00"],
         "duration_days": 14,
-        "instruction": "G TWILY",
+        "instruction": "TWICE DAILY AT 8AM AND 8PM X 14 DAYS",
         "start_date": "2026-02-07"
     },
     {
@@ -53,7 +54,7 @@ MEDICINES = [
         "frequency": "thrice",
         "times": ["08:00", "14:00", "20:00"],
         "duration_days": 5,
-        "instruction": "THRICE DAILY",
+        "instruction": "THRICE DAILY AT 8AM-2PM-8PM X 5 DAYS",
         "start_date": "2026-02-07"
     },
     {
@@ -63,7 +64,7 @@ MEDICINES = [
         "frequency": "twice",
         "times": ["08:00", "20:00"],
         "duration_days": 30,
-        "instruction": "TWICE DAILY",
+        "instruction": "TWICE DAILY FOR 1 MONTH",
         "start_date": "2026-02-07"
     },
     {
@@ -72,8 +73,8 @@ MEDICINES = [
         "dosage": "75/20MG",
         "frequency": "once",
         "times": ["20:00"],
-        "duration_days": 14,
-        "instruction": "ONCE DAILY AT 8 PM",
+        "duration_days": 30,
+        "instruction": "ONCE DAILY AT 8 PM X 1 MONTH",
         "start_date": "2026-02-07"
     },
     {
@@ -83,7 +84,7 @@ MEDICINES = [
         "frequency": "twice",
         "times": ["08:00", "20:00"],
         "duration_days": 30,
-        "instruction": "TWICE DAILY",
+        "instruction": "TWICE DAILY AT 8AM AND 8PM X 1 MONTH",
         "start_date": "2026-02-07"
     },
     {
@@ -93,7 +94,7 @@ MEDICINES = [
         "frequency": "once",
         "times": ["07:00"],
         "duration_days": 30,
-        "instruction": "ONCE DAILY AT 7 AM BEFORE BREAKFAST",
+        "instruction": "ONCE DAILY AT 7AM BEFORE BREAKFAST X 1 MONTH",
         "start_date": "2026-02-07"
     },
     {
@@ -103,7 +104,7 @@ MEDICINES = [
         "frequency": "once",
         "times": ["14:00"],
         "duration_days": 30,
-        "instruction": "ONCE DAILY AT 2 PM",
+        "instruction": "ONCE DAILY AT 2 PM X 1 MONTH",
         "start_date": "2026-02-07"
     },
     {
@@ -113,7 +114,7 @@ MEDICINES = [
         "frequency": "twice",
         "times": ["08:00", "20:00"],
         "duration_days": 30,
-        "instruction": "TWICE DAILY",
+        "instruction": "TWICE DAILY FOR 1 MONTH",
         "start_date": "2026-02-07"
     },
     {
