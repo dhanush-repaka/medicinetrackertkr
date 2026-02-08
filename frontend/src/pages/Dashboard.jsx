@@ -19,14 +19,16 @@ import {
   Sun,
   Sunset,
   Moon,
-  Activity
+  Activity,
+  Cloud,
+  CloudOff
 } from "lucide-react";
-import {
-  getMedicinesForDate,
-  getIntakeRecordsForDate,
-  saveIntakeRecord,
-  getStatsForDate
-} from "../data/medicines";
+import { getMedicinesForDate } from "../data/medicines";
+import { 
+  saveIntakeRecord, 
+  subscribeToIntakeRecords, 
+  getStatsFromRecords 
+} from "../data/firebaseService";
 
 const getTimeBadgeClass = (time) => {
   const hour = parseInt(time.split(":")[0]);
@@ -101,52 +103,48 @@ export default function Dashboard() {
   const [intakeRecords, setIntakeRecords] = useState({});
   const [stats, setStats] = useState({ total: 0, taken: 0, pending: 0, percentage: 0 });
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
 
   const dateStr = format(selectedDate, "yyyy-MM-dd");
 
-  const loadData = useCallback(() => {
-    setLoading(true);
-    
-    // Get medicines for selected date
+  // Load medicines for selected date
+  useEffect(() => {
     const scheduledMedicines = getMedicinesForDate(dateStr);
     setMedicines(scheduledMedicines);
-    
-    // Get intake records from localStorage
-    const records = getIntakeRecordsForDate(dateStr);
-    const intakeMap = {};
-    Object.keys(records).forEach(key => {
-      intakeMap[key] = records[key].taken;
-    });
-    setIntakeRecords(intakeMap);
-    
-    // Get stats
-    const dateStats = getStatsForDate(dateStr);
-    setStats(dateStats);
-    
-    setLoading(false);
   }, [dateStr]);
 
+  // Subscribe to Firebase real-time updates
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    setLoading(true);
+    
+    const unsubscribe = subscribeToIntakeRecords(dateStr, (records) => {
+      setIntakeRecords(records);
+      setLoading(false);
+    });
 
-  const handleToggle = (medicine, currentTaken) => {
+    return () => unsubscribe();
+  }, [dateStr]);
+
+  // Update stats when medicines or records change
+  useEffect(() => {
+    const newStats = getStatsFromRecords(medicines, intakeRecords);
+    setStats(newStats);
+  }, [medicines, intakeRecords]);
+
+  const handleToggle = async (medicine, currentTaken) => {
     const key = `${medicine.medicine_id}-${medicine.time}`;
     const newTaken = !currentTaken;
     
     // Optimistic update
     setIntakeRecords(prev => ({ ...prev, [key]: newTaken }));
-    setStats(prev => ({
-      ...prev,
-      taken: newTaken ? prev.taken + 1 : prev.taken - 1,
-      pending: newTaken ? prev.pending - 1 : prev.pending + 1,
-      percentage: Math.round(((newTaken ? prev.taken + 1 : prev.taken - 1) / prev.total) * 100)
-    }));
+    setSyncing(true);
 
-    // Save to localStorage
-    const success = saveIntakeRecord(dateStr, medicine.medicine_id, medicine.time, newTaken);
+    // Save to Firebase
+    const success = await saveIntakeRecord(dateStr, medicine.medicine_id, medicine.time, newTaken);
+    
+    setSyncing(false);
     
     if (success && newTaken) {
       toast.success(`${medicine.name} marked as taken`, {
@@ -155,13 +153,7 @@ export default function Dashboard() {
     } else if (!success) {
       // Revert on failure
       setIntakeRecords(prev => ({ ...prev, [key]: currentTaken }));
-      setStats(prev => ({
-        ...prev,
-        taken: currentTaken ? prev.taken : prev.taken - 1,
-        pending: currentTaken ? prev.pending : prev.pending + 1,
-        percentage: Math.round((currentTaken ? prev.taken : prev.taken - 1) / prev.total * 100)
-      }));
-      toast.error("Failed to save. Please try again.");
+      toast.error("Failed to sync. Please try again.");
     }
   };
 
@@ -213,15 +205,30 @@ export default function Dashboard() {
                 <p className="text-sm text-muted-foreground">Post-Surgery Recovery</p>
               </div>
             </div>
-            <Button 
-              variant="outline" 
-              className="gap-2 rounded-full"
-              onClick={() => window.location.href = window.location.pathname.replace(/\/$/, '') + '/print'}
-              data-testid="print-schedule-btn"
-            >
-              <Printer className="w-4 h-4" />
-              <span className="hidden sm:inline">Print Schedule</span>
-            </Button>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                {syncing ? (
+                  <>
+                    <Cloud className="w-4 h-4 animate-pulse text-primary" />
+                    <span className="hidden sm:inline">Syncing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Cloud className="w-4 h-4 text-emerald-500" />
+                    <span className="hidden sm:inline">Synced</span>
+                  </>
+                )}
+              </div>
+              <Button 
+                variant="outline" 
+                className="gap-2 rounded-full"
+                onClick={() => window.location.hash = '#/print'}
+                data-testid="print-schedule-btn"
+              >
+                <Printer className="w-4 h-4" />
+                <span className="hidden sm:inline">Print Schedule</span>
+              </Button>
+            </div>
           </div>
         </div>
       </header>
