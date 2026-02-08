@@ -1,0 +1,180 @@
+{
+  "identity": {
+    "name": "E1",
+    "role": "Creative Designer",
+    "tone": "Clinical Zen",
+    "mission": "Create a calm, trustworthy, and highly legible medication tracker for post-surgery patients."
+  },
+  "typography": {
+    "font_family": {
+      "headings": "Manrope, sans-serif",
+      "body": "Inter, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "scale": {
+      "h1": "text-4xl md:text-5xl font-bold tracking-tight",
+      "h2": "text-3xl font-semibold tracking-tight",
+      "h3": "text-2xl font-semibold",
+      "body_lg": "text-lg leading-relaxed",
+      "body_base": "text-base leading-relaxed",
+      "caption": "text-sm text-muted-foreground"
+    },
+    "imports": [
+      "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@500;600;700;800&display=swap');"
+    ]
+  },
+  "colors": {
+    "theme": "light",
+    "palette": {
+      "background": "#F8FAF9",
+      "foreground": "#0F172A",
+      "card": "#FFFFFF",
+      "card_foreground": "#0F172A",
+      "popover": "#FFFFFF",
+      "popover_foreground": "#0F172A",
+      "primary": "#059669",
+      "primary_foreground": "#FFFFFF",
+      "secondary": "#E2E8F0",
+      "secondary_foreground": "#1E293B",
+      "muted": "#F1F5F9",
+      "muted_foreground": "#64748B",
+      "accent": "#D1FAE5",
+      "accent_foreground": "#065F46",
+      "destructive": "#EF4444",
+      "destructive_foreground": "#FFFFFF",
+      "border": "#E2E8F0",
+      "input": "#E2E8F0",
+      "ring": "#059669"
+    },
+    "usage": {
+      "primary_action": "bg-primary text-primary-foreground hover:bg-primary/90",
+      "secondary_action": "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+      "success_state": "bg-emerald-100 text-emerald-800 border-emerald-200",
+      "warning_state": "bg-amber-100 text-amber-800 border-amber-200",
+      "error_state": "bg-red-100 text-red-800 border-red-200"
+    }
+  },
+  "layout": {
+    "spacing": {
+      "container_padding": "p-6 md:p-12",
+      "section_gap": "gap-8 md:gap-12",
+      "item_gap": "gap-4"
+    },
+    "grids": {
+      "dashboard": "grid grid-cols-1 lg:grid-cols-12 gap-8",
+      "schedule": "grid grid-cols-1 md:grid-cols-7 gap-4",
+      "bento_dashboard": {
+        "hero": "col-span-1 lg:col-span-4 row-span-2",
+        "timeline": "col-span-1 lg:col-span-8 row-span-2",
+        "stats": "col-span-1 lg:col-span-12 grid grid-cols-2 md:grid-cols-4 gap-4"
+      }
+    },
+    "containers": {
+      "main": "max-w-7xl mx-auto min-h-screen bg-background",
+      "card": "bg-card rounded-xl border border-border shadow-sm p-6"
+    }
+  },
+  "components": {
+    "buttons": {
+      "base": "inline-flex items-center justify-center rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
+      "variants": {
+        "default": "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-lg transition-all duration-300",
+        "outline": "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        "ghost": "hover:bg-accent hover:text-accent-foreground"
+      }
+    },
+    "cards": {
+      "medicine_card": "group relative overflow-hidden rounded-2xl border border-border bg-card p-6 transition-all hover:shadow-md hover:border-primary/50",
+      "active_glow": "absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
+    },
+    "inputs": {
+      "base": "flex h-12 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+    }
+  },
+  "visual_enhancers": {
+    "shadows": {
+      "soft": "shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)]",
+      "hover": "shadow-[0_10px_30px_-10px_rgba(5,150,105,0.15)]"
+    },
+    "borders": {
+      "subtle": "border border-slate-100",
+      "active": "border-l-4 border-l-primary"
+    },
+    "glassmorphism": {
+      "header": "bg-white/80 backdrop-blur-md border-b border-slate-200/50 sticky top-0 z-50"
+    }
+  },
+  "motion": {
+    "library": "framer-motion",
+    "animations": {
+      "page_transition": {
+        "initial": { "opacity": 0, "y": 20 },
+        "animate": { "opacity": 1, "y": 0 },
+        "exit": { "opacity": 0, "y": -20 },
+        "transition": { "duration": 0.4, "ease": "easeOut" }
+      },
+      "list_item": {
+        "variants": {
+          "hidden": { "opacity": 0, "x": -20 },
+          "visible": { "opacity": 1, "x": 0 }
+        }
+      },
+      "hover_scale": {
+        "whileHover": { "scale": 1.02 },
+        "whileTap": { "scale": 0.98 }
+      }
+    }
+  },
+  "assets": {
+    "icons": {
+      "library": "lucide-react",
+      "preferred": ["Pill", "Calendar", "CheckCircle2", "Clock", "Activity", "Printer", "ChevronLeft", "ChevronRight"]
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1769105188061-4054429adc91?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTF8MHwxfHNlYXJjaHwxfHxtaW5pbWFsaXN0JTIwbWVkaWNhbCUyMHBpbGxzJTIwaGVhbHRofGVufDB8fHx8MTc3MDUyNzU1Nnww&ixlib=rb-4.1.0&q=85",
+        "category": "hero_placeholder",
+        "description": "Minimalist red and blue pills, use for 'Add Medicine' or empty state"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1598668724539-6ec6b2b84971?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTF8MHwxfHNlYXJjaHw0fHxtaW5pbWFsaXN0JTIwbWVkaWNhbCUyMHBpbGxzJTIwaGVhbHRofGVufDB8fHx8MTc3MDUyNzU1Nnww&ixlib=rb-4.1.0&q=85",
+        "category": "export_visual",
+        "description": "White plastic case, use for 'Export/Print' section visual"
+      }
+    ]
+  },
+  "accessibility": {
+    "contrast": "Ensure text is Slate-700 or darker on light backgrounds.",
+    "focus_states": "Visible ring-2 ring-primary ring-offset-2 on all interactive elements.",
+    "aria_labels": "Required for all icon-only buttons (e.g., 'Mark as taken')."
+  },
+  "instructions_to_main_agent": [
+    "1. SETUP: Update `index.css` with the CSS variables defined in `colors.palette`. Use HSL values for Tailwind compatibility.",
+    "2. LAYOUT: Create a `DashboardLayout` component that includes the Glassmorphism header and a responsive sidebar/nav.",
+    "3. COMPONENTS: Create a `MedicineCard` component. It must handle 'Taken', 'Missed', and 'Upcoming' states visually (e.g., green check, red alert, neutral clock).",
+    "4. PRINT: Implement a specific 'Print View' page that strips away navigation and renders a high-contrast, black-and-white friendly table for the schedule.",
+    "5. STATE: Use local storage or a simple context to persist the 'checked' state of medicines as requested.",
+    "6. DATA: Mock the 13 medicines with varying schedules (Once daily, Twice daily, Thrice daily) to demonstrate the logic.",
+    "7. TESTING: Add `data-testid` to the 'Take' checkbox, the Date Picker, and the Print button."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy",
+    "Use glass-morphism effects with backdrop filters (12-24px blur)",
+    "You MUST NOT apply universal transition. Eg: `transition: all`. This results in breaking transforms. Always add transitions for specific interactive elements like button, input excluding transforms",
+    "You MUST NOT center align the app container, ie do not add `.App { text-align: center; }` in the css file. This disrupts the human natural reading flow of text",
+    "Always use modern button styles like pill-shaped, or sharp button with interaction animations & color relevant to the app style",
+    "NEVER: use AI assistant Emoji characters like 🤖🧠💭💡🔮🎯📚🎭🎬🎪🎉🎊🎁🎀🎂🍰🎈🎨🎰💰💵💳🏦💎🪙💸🤑📊📈📉💹🔢🏆🥇 etc for icons.",
+    "Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations. Static = dead.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations: separates good from extraordinary.",
+    "Main agent relies on these image URLs. Missing categories (especially sponsor logos) = main agent will use placeholder text which is FORBIDDEN",
+    "Prioritize using pre-existing components from src/components/ui when applicable",
+    "Create new components that match the style and conventions of existing components when needed",
+    "Examine existing components to understand the project's component patterns before creating new ones",
+    "Components MUST use named exports (export const ComponentName = ...)",
+    "Pages MUST use default exports (export default function PageName() {...})",
+    "Use `sonner` for toasts. Sonner component are located in `/app/src/components/ui/sonner.tsx`"
+  ]
+}
