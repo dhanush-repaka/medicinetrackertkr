@@ -75,6 +75,10 @@
         @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium;
     }
     
+    .time-badge-early {
+        @apply bg-orange-100 text-orange-800;
+    }
+    
     .time-badge-morning {
         @apply bg-amber-100 text-amber-800;
     }
